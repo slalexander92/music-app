@@ -8,8 +8,7 @@
       <AudioPlayer
         :track="currentTrack"
         :artist="artist"
-        v-on:change-song="changeSong"
-        :trackState="trackState" />
+        v-on:change-song="changeSong"/>
     </div>
 
   </div>
@@ -32,6 +31,16 @@ export default {
       .catch( err => console.log( err ) );
 
   },
+
+  data:() => ({
+    album: null,
+    album_name: null,
+    artist : null,
+    tracks: null,
+    trackId : 0,
+    currentTrack : null,
+  }),
+
   watch: {
     album( album ){
       Object.assign( this, album );
@@ -45,26 +54,11 @@ export default {
       this.currentTrack = this.tracks[id];
     }
   },
-  data:() => ({
-    album: null,
-    album_name: null,
-    artist : null,
-    tracks: null,
-    trackId : 0,
-    currentTrack : null,
-    trackState:{
-      state:'pause',
-      elapsed:'',
-      duration:'',
-    }
-  }),
 
   methods:{
-
     changeSong( direction ){
 
       switch( direction ){
-
         case 'next' :
           if( this.trackId !== this.tracks.length - 1 ){
             this.trackId += 1;
@@ -81,9 +75,8 @@ export default {
             this.trackId = this.tracks.length - 1;
           }
           break;
-
       }
-    }
+    },
 
   }
 
@@ -108,5 +101,7 @@ export default {
   bottom: 0;
   height: 20%;
   padding: 15px 30px;
+  box-shadow:0 -20px 60px 50px white;
+
 }
 </style>

@@ -4,8 +4,8 @@
     <div class="flex-row">
       <div id="controller">
         <i class="material-icons" @click="prevSong">skip_previous</i>
-        <i class="material-icons" v-show="trackState.state === 'pause' " @click="toggleState( 'play' )">play_arrow</i>
-        <i class="material-icons" v-show="trackState.state === 'play' " @click="toggleState( 'pause' )">pause</i>
+        <i class="material-icons" v-show="trackState.state === 'pause' " @click=" trackState.state ='play' ">play_arrow</i>
+        <i class="material-icons" v-show="trackState.state === 'play' " @click=" trackState.state = 'pause' ">pause</i>
         <i class="material-icons" @click="nextSong">skip_next</i>
       </div>
       <div id="player">
@@ -18,11 +18,11 @@
             <div class="indicator"></div>
           </div>
           <div class="flex-row">
-            <p></p>
+            <!-- <p>{{ trackState.elapsed }}</p> -->
             <p>{{ trackState.duration }}</p>
           </div>
         </div>
-        <audio id='audio-track' ref="audio" :src='track.url' preload="metadata" ></audio>
+        <audio id='audio-track' ref="audio" :src='track.url' preload="metadata" autoplay></audio>
       </div>
     </div>
   </div>
@@ -32,44 +32,60 @@
 <script>
 export default {
 
-  props:{
-    artist: String,
-    track: Object,
-    trackState : Object,
-  },
-  watch:{
-    track( track ){
-      this.trackURL = track.url;
-    },
-  },
   mounted(){
+
     const audio = document.getElementById('audio-track');
 
     audio.addEventListener("loadedmetadata", ( e ) => {
       const duration = audio.duration;
       const mins     = parseInt( audio.duration / 60, 10 );
-      const seconds  = parseInt( audio.duration % 60 );
+      const seconds  = parseInt( audio.duration % 60, 10 );
 
       this.trackState.duration = `${mins}:${seconds}`
     });
   },
-  computed(){
-
+  props:{
+    artist: String,
+    track: Object,
   },
-  methods:{
+  data:() => ({
+    trackState:{
+      state:'play',
+      elapsed:'',
+      duration:'',
+    }
+  }),
+  watch:{
+    track( track ){
 
-    toggleState( changeState ){
+      this.trackState = {
+        state:'play',
+        elapsed:'',
+        duration:'',
+      }
 
-      if( changeState === 'play' ){
-        this.trackState.state = 'play';
+      this.trackURL = track.url;
+    },
+
+    'trackState.state':function( state ){
+
+      if( state === 'play' ){
         this.$refs.audio.play();
       }
       else{
-        this.trackState.state = 'pause';
         this.$refs.audio.pause();
       }
-
     },
+
+  },
+  computed:{
+
+    timeElapsed(){
+      //TODO
+    },
+
+  },
+  methods:{
     nextSong(){
       this.$emit('change-song', 'next');
       this.$refs.audio.play();
@@ -87,6 +103,19 @@ export default {
 <style lang="scss" scoped>
 
 @import '../globals/variables';
+
+#control-container{
+  //TODO: fill in progress bar by percentage based on elapsed / duration
+  .progress-bar{
+
+    .indicator{
+
+    }
+
+  }
+
+}
+
 
 i.material-icons{
   cursor: pointer;
