@@ -109,7 +109,7 @@ export default {
   .progress-bar{
 
     .indicator{
-
+      //
     }
 
   }
