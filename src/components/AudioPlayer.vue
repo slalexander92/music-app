@@ -3,10 +3,16 @@
   <div id="audio-player">
     <div class="flex-row">
       <div id="controller">
-        <i class="material-icons" @click="prevSong">skip_previous</i>
-        <i class="material-icons" v-show="trackState.state === 'pause' " @click=" trackState.state ='play' ">play_arrow</i>
-        <i class="material-icons" v-show="trackState.state === 'play' " @click=" trackState.state = 'pause' ">pause</i>
-        <i class="material-icons" @click="nextSong">skip_next</i>
+        <i class="material-icons"
+          @click="prevSong">skip_previous</i>
+        <i class="material-icons"
+          v-show="state === 'pause' "
+          @click=" state ='play' ">play_arrow</i>
+        <i class="material-icons"
+          v-show="state === 'play' "
+          @click=" state = 'pause' ">pause</i>
+        <i class="material-icons"
+          @click="nextSong">skip_next</i>
       </div>
       <div id="player">
         <div class="flex-row">
@@ -17,9 +23,9 @@
           <div class="progress-bar">
             <div class="indicator"></div>
           </div>
-          <div class="flex-row">
-            <!-- <p>{{ trackState.elapsed }}</p> -->
-            <p>{{ trackState.duration }}</p>
+          <div id="duration" class="flex-row">
+            <p>{{ elapsed }}</p>
+            <p>{{ duration }}</p>
           </div>
         </div>
         <audio id='audio-track' ref="audio" :src='track.url' preload="metadata" autoplay></audio>
@@ -34,65 +40,69 @@ export default {
 
   mounted(){
 
-    const audio = document.getElementById('audio-track');
+    this.audioTrack = document.getElementById('audio-track');
 
-    audio.addEventListener("loadedmetadata", ( e ) => {
-      const duration = audio.duration;
-      const mins     = parseInt( audio.duration / 60, 10 );
-      const seconds  = parseInt( audio.duration % 60, 10 );
+    this.audioTrack.addEventListener('loadedmetadata', ( e ) => {
+      const duration = this.audioTrack.duration;
+      const mins     = parseInt( duration / 60, 10 );
+      const seconds  = parseInt( duration % 60, 10 );
 
-      this.trackState.duration = `${mins}:${seconds}`
+      this.duration = `${mins}:${seconds}`;
     });
+
+    // Countdown
+    this.audioTrack.addEventListener('timeupdate', () => {
+        let s = parseInt(this.audioTrack.currentTime % 60);
+        let m = parseInt((this.audioTrack.currentTime / 60) % 60);
+
+        s < 10 ? this.elapsed = `${m}:0${s}` : this.elapsed = `${m}:${s}`
+
+    }, false);
+
   },
   props:{
     artist: String,
     track: Object,
   },
   data:() => ({
-    trackState:{
-      state:'play',
-      elapsed:'',
-      duration:'',
-    }
+    state:'play',
+    audioTrack : '',
+    duration:'',
+    trackURL: '',
+    elapsed : '',
   }),
   watch:{
     track( track ){
 
-      this.trackState = {
-        state:'play',
-        elapsed:'',
-        duration:'',
-      }
-
+      this.state = 'play';
       this.trackURL = track.url;
     },
-
-    'trackState.state':function( state ){
+    state( state ){
 
       if( state === 'play' ){
-        this.$refs.audio.play();
+        this.audioTrack.play();
       }
       else{
-        this.$refs.audio.pause();
+        this.audioTrack.pause();
       }
     },
 
   },
   computed:{
 
-    timeElapsed(){
-      //TODO
-    },
+    // elapsed(){
+    //   return parseInt( this.audioTrack.currentTime, 10);
+    // },
 
   },
   methods:{
     nextSong(){
       this.$emit('change-song', 'next');
-      this.$refs.audio.play();
+      this.audioTrack.play();
     },
     prevSong(){
       this.$emit('change-song', 'prev');
-      this.$refs.audio.pause();
+      this.audioTrack.pause();
     }
 
   },
@@ -106,16 +116,25 @@ export default {
 
 #control-container{
   //TODO: fill in progress bar by percentage based on elapsed / duration
+
   .progress-bar{
+    width: 400px;
+    height: 3px;
+    border-radius: 2px;
+    background-color: $gray;
+    margin: 5px 0;
 
     .indicator{
       //
     }
-
   }
 
-}
+  #duration{
+    justify-content: space-between;
+  }
 
+
+}
 
 i.material-icons{
   cursor: pointer;
