@@ -47,8 +47,6 @@ export default {
     },
     tracks( tracks ){
       this.currentTrack = tracks[this.trackId];
-
-      console.log( this.currentTrack );
     },
     trackId( id ){
       this.currentTrack = this.tracks[id];
@@ -58,22 +56,15 @@ export default {
   methods:{
     changeSong( direction ){
 
+      const notLastIndex  = this.trackId !== this.tracks.length - 1;
+      const notFirstIndex = this.trackId !== 0;
+
       switch( direction ){
         case 'next' :
-          if( this.trackId !== this.tracks.length - 1 ){
-            this.trackId += 1;
-          }
-          else{
-            this.trackId = 0;
-          }
+          notLastIndex ? this.trackId += 1 : this.trackId = 0;
           break;
         case 'prev' :
-          if( this.trackId !== 0 ){
-            this.trackId -= 1;
-          }
-          else{
-            this.trackId = this.tracks.length - 1;
-          }
+          notFirstIndex ? this.trackId -= 1 : this.trackId = this.tracks.length - 1;
           break;
       }
     },
