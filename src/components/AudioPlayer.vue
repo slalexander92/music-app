@@ -16,12 +16,12 @@
       </div>
       <div id="player">
         <div class="flex-row">
-          <p>{{ artist }}</p>
+          <p id="artist">{{ artist }}</p>
           <p>{{ track.name }}</p>
         </div>
         <div id="control-container" class="flex-column">
           <div class="progress-bar">
-            <div class="indicator"></div>
+            <div class="indicator" :style="{ width : indicatorWidth + '%' }"></div>
           </div>
           <div id="duration" class="flex-row">
             <p>{{ elapsed }}</p>
@@ -42,22 +42,25 @@ export default {
 
     this.audioTrack = document.getElementById('audio-track');
 
+    // duration
     this.audioTrack.addEventListener('loadedmetadata', ( e ) => {
       const duration = this.audioTrack.duration;
       const mins     = parseInt( duration / 60, 10 );
       const seconds  = parseInt( duration % 60, 10 );
 
-      this.duration = `${mins}:${seconds}`;
+      seconds < 10 ? this.duration = `${mins}:0${seconds}` : this.duration = `${mins}:${seconds}`
+
     });
 
-    // Countdown
+    // current time
     this.audioTrack.addEventListener('timeupdate', () => {
         let s = parseInt(this.audioTrack.currentTime % 60);
         let m = parseInt((this.audioTrack.currentTime / 60) % 60);
 
         s < 10 ? this.elapsed = `${m}:0${s}` : this.elapsed = `${m}:${s}`
 
-    }, false);
+        this.indicatorWidth = ( this.audioTrack.currentTime / this.audioTrack.duration ) * 100;
+    });
 
   },
   props:{
@@ -67,9 +70,10 @@ export default {
   data:() => ({
     state:'play',
     audioTrack : '',
-    duration:'',
     trackURL: '',
+    duration:'',
     elapsed : '',
+    indicatorWidth: 0,
   }),
   watch:{
     track( track ){
@@ -86,13 +90,6 @@ export default {
         this.audioTrack.pause();
       }
     },
-
-  },
-  computed:{
-
-    // elapsed(){
-    //   return parseInt( this.audioTrack.currentTime, 10);
-    // },
 
   },
   methods:{
@@ -114,25 +111,45 @@ export default {
 
 @import '../globals/variables';
 
+
+#audio-player{
+  margin: 0 auto;
+}
+
+#controller{
+  margin-right: 30px;
+}
+
+#player{
+
+  #artist{
+    margin-right: 30px;
+  }
+}
+
 #control-container{
   //TODO: fill in progress bar by percentage based on elapsed / duration
 
   .progress-bar{
-    width: 400px;
+    width: 600px;
     height: 3px;
     border-radius: 2px;
     background-color: $gray;
-    margin: 5px 0;
+    margin: 10px 0;
 
     .indicator{
-      //
+      background-color: $green;
+      height: 100%;
+      transition: all .1s ease;
     }
   }
 
   #duration{
     justify-content: space-between;
+    p{
+      color: #adadad
+    }
   }
-
 
 }
 
